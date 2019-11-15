@@ -1,16 +1,15 @@
-# maven-repo
-提供一个棋牌游戏的骨架，开发新的玩法时可以共用。
+## 提供一个棋牌游戏的骨架，开发新的玩法时可以共用。
 
 ## github仓库生成:
     mvn deploy -DaltDeploymentRepository=mustang-mvn-repo::default::file:/Volumes/MUS/JOB/github.com/src/github.com/maven-repo/repository/
 
-使用方法：
+## 使用方法：
 
-GameServer.getInstance().setChannelInitializer( xxx );
-GameServer.getInstance().initServer( xxx );
-GameServer.getInstance().startServer();
+    GameServer.getInstance().setChannelInitializer( xxx );
+    GameServer.getInstance().initServer( xxx );
+    GameServer.getInstance().startServer();
 
-TODO
+## TODO
 
 把聊天功能写完——可能要加个callback √
 codec系统，提供一下amf3编解码    √
