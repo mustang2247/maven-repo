@@ -1,16 +1,22 @@
 ## 提供一个棋牌游戏的骨架，开发新的玩法时可以共用。
 
 ## github仓库生成:
-    mvn deploy -DaltDeploymentRepository=mustang-mvn-repo::default::file:/Volumes/MUS/JOB/github.com/src/github.com/maven-repo/repository/
+```shell
+mvn deploy -DaltDeploymentRepository=mustang-mvn-repo::default::file:/Volumes/MUS/JOB/github.com/src/github.com/maven-repo/repository/
+
+```
 
 ## 使用方法：
+```java
+GameServer.getInstance().setChannelInitializer( xxx );
+GameServer.getInstance().initServer( xxx );
+GameServer.getInstance().startServer();
 
-    GameServer.getInstance().setChannelInitializer( xxx );
-    GameServer.getInstance().initServer( xxx );
-    GameServer.getInstance().startServer();
+```
+    
 
 ## TODO
-
+```markdown
 把聊天功能写完——可能要加个callback √
 codec系统，提供一下amf3编解码    √
 在net模块新建netty的channelInitializer
@@ -31,5 +37,9 @@ codec系统，提供一下amf3编解码    √
 写一个简单的客户端框架
 
 最后断开连接的时候，还会收到一个decodeLast的通知，需要处理
+
+```
+
+
 
 
