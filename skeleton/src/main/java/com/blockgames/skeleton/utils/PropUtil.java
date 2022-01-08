@@ -1,7 +1,6 @@
 package com.blockgames.skeleton.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,10 +12,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * @author mustangkong
+ */
+@Slf4j
 public class PropUtil {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger( PropUtil.class );
+    //private static final Logger log = LoggerFactory.getLogger( PropUtil.class );
 
     public static InputStream getRemoteInputStream( String urlPath ) {
         URL url = null;
@@ -29,7 +31,7 @@ public class PropUtil {
             is = conn.getInputStream();
         }
         catch( Exception e ) {
-            logger.error( e.getMessage(), e );
+            log.error( e.getMessage(), e );
         }
         return is;
     }
@@ -55,7 +57,6 @@ public class PropUtil {
     }
 
     public static String getProp( String filePath, String key ) {
-
         Properties prop = new Properties();
         InputStream in = getInputStream( filePath );
         try {
@@ -63,7 +64,7 @@ public class PropUtil {
             return prop.getProperty( key ).trim();
         }
         catch( IOException e ) {
-            logger.error( e.getMessage(), e );
+            log.error( e.getMessage(), e );
         }
 
         return null;
@@ -78,7 +79,7 @@ public class PropUtil {
             return prop.getProperty( key ).trim();
         }
         catch( IOException e ) {
-            logger.error( e.getMessage(), e );
+            log.error( e.getMessage(), e );
         }
 
         return null;
@@ -92,7 +93,7 @@ public class PropUtil {
             return prop;
         }
         catch( IOException e ) {
-            logger.error( e.getMessage(), e );
+            log.error( e.getMessage(), e );
         }
 
         return null;
@@ -106,7 +107,7 @@ public class PropUtil {
             return prop;
         }
         catch( IOException e ) {
-            logger.error( e.getMessage(), e );
+            log.error( e.getMessage(), e );
         }
 
         return null;
@@ -121,8 +122,9 @@ public class PropUtil {
         Properties properties = null;
         while( ( line = reader.readLine() ) != null ) {
             line = line.trim();
-            if( line.length() == 0 || line.startsWith( "#" ) ) continue;
-            else if( line.matches( "\\[.*\\]" ) ) {
+            if( line.length() == 0 || line.startsWith( "#" ) ) {
+                continue;
+            } else if( line.matches( "\\[.*\\]" ) ) {
                 section = line.replaceFirst( "\\[(.*)\\]", "$1" );
                 properties = new Properties();
                 rv.put( section, properties );
@@ -149,8 +151,9 @@ public class PropUtil {
         Properties properties = null;
         while( ( line = reader.readLine() ) != null ) {
             line = line.trim();
-            if( line.length() == 0 || line.startsWith( "#" ) ) continue;
-            else if( line.matches( "\\[.*\\]" ) ) {
+            if( line.length() == 0 || line.startsWith( "#" ) ) {
+                continue;
+            } else if( line.matches( "\\[.*\\]" ) ) {
                 section = line.replaceFirst( "\\[(.*)\\]", "$1" );
                 properties = new Properties();
                 rv.put( section, properties );

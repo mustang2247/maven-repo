@@ -1,23 +1,18 @@
-/**
- *
- */
 package com.blockgames.skeleton.dispatch;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.ExecutorService;
 
 import com.blockgames.skeleton.arch.ThreadPoolRegistry;
 import com.blockgames.skeleton.base.SynEnvBase;
 import com.blockgames.skeleton.base.SynEnvExtractor;
 import com.blockgames.skeleton.base.SynEnvTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.channel.ChannelHandlerContext;
+import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.ExecutorService;
+
+@Slf4j
 public class MessageDispatcher {
-
-    private static final Logger logger = LoggerFactory.getLogger( MessageDispatcher.class );
+    //private static final Logger log = LoggerFactory.getLogger( MessageDispatcher.class );
     private CommandRegistry cmdReg = null;
     private ThreadPoolRegistry tpReg = null;
 
@@ -56,7 +51,7 @@ public class MessageDispatcher {
 
         final CommandProperties properties = cmdReg.get( kindId );
         if( properties == null ) {
-            logger.error( "[MessageDispatcher::dispatch] not find kindID {} from {}", kindId, ctx.channel().remoteAddress() );
+            log.error( "[MessageDispatcher::dispatch] not find kindID {} from {}", kindId, ctx.channel().remoteAddress() );
             return;
         }
 
@@ -69,14 +64,14 @@ public class MessageDispatcher {
 
             ExecutorService ses = tpReg.get( properties.domain );
             if( ses == null ) {
-                logger.error( "[MessageDispatcher::dispatch] not find domain {} from {}", properties.domain, ctx.channel().remoteAddress() );
+                log.error( "[MessageDispatcher::dispatch] not find domain {} from {}", properties.domain, ctx.channel().remoteAddress() );
                 return;
             }
 
             if( "SYNC".equals( properties.domain ) ) {
                 SynEnvBase seb = synEnvExtractor.extract( message );
                 if( seb == null ) {
-                    logger.error( "[MessageDispatcher::dispatch] SynEnvBase not found from message[{}] ip[{}]",
+                    log.error( "[MessageDispatcher::dispatch] SynEnvBase not found from message[{}] ip[{}]",
                             message.toString(), ctx.channel().remoteAddress() );
                     return;
                 }
@@ -87,7 +82,7 @@ public class MessageDispatcher {
                             properties.method.invoke( properties.proxyObj, new Object[]{ msgId, message, ctx } );
                         }
                         catch( InvocationTargetException e ) {
-                            logger.error( e.getMessage(), e );
+                            log.error( e.getMessage(), e );
                         }
                     }
                 } );
@@ -95,19 +90,25 @@ public class MessageDispatcher {
             else {
                 ses.execute( () -> {
                     try {
-                        if( properties.method == null ) logger.debug( "method is null" );
-                        if( properties.proxyObj == null ) logger.debug( "proxyObj is null" );
-                        if( message == null ) logger.debug( "message is null" );
+                        if( properties.method == null ) {
+                            log.debug( "method is null" );
+                        }
+                        if( properties.proxyObj == null ) {
+                            log.debug( "proxyObj is null" );
+                        }
+                        if( message == null ) {
+                            log.debug( "message is null" );
+                        }
                         properties.method.invoke( properties.proxyObj, new Object[]{ msgId, message, ctx } );
                     }
                     catch( InvocationTargetException e ) {
-                        logger.error( e.getMessage(), e );
+                        log.error( e.getMessage(), e );
                     }
                 } );
             }
         }
         catch( Exception e ) {
-            logger.error( e.getMessage(), e );
+            log.error( e.getMessage(), e );
         }
     }
 

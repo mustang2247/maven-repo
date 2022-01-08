@@ -5,15 +5,18 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
+/**
+ * @author mustangkong
+ */
 public class StringsEncoder extends MessageToByteEncoder<NetMessage> {
 
-	@Override
-	public void encode( ChannelHandlerContext ctx, NetMessage msg,
-			ByteBuf out ) throws Exception {
-		out.writeInt( msg.getKindId() );
-		out.writeInt( msg.getMsgId() );
-		StringsMessage message = (StringsMessage) msg.getMessage();
-		out.writeBytes( message.toBytes() );
-	}
+    @Override
+    public void encode(ChannelHandlerContext ctx, NetMessage msg,
+                       ByteBuf out) throws Exception {
+        out.writeInt(msg.getKindId());
+        out.writeInt(msg.getMsgId());
+        StringsMessage message = (StringsMessage) msg.getMessage();
+        out.writeBytes(message.toBytes());
+    }
 
 }

@@ -47,15 +47,18 @@ public class XmlParser extends DefaultHandler {
     @Override
     public void startElement( String uri, String localName, String qName,
                               Attributes attributes ) throws SAXException {
-        if( qName.equals( elementName ) ) begin();
+        if( qName.equals( elementName ) ) {
+            begin();
+        }
         data.setLength( 0 );
     }
 
     @Override
     public void endElement( String uri, String localName, String qName )
             throws SAXException {
-        if( qName.equals( elementName ) ) end();
-        else if( qName != null ) {
+        if( qName.equals( elementName ) ) {
+            end();
+        } else if( qName != null ) {
             process( qName, convertSpecial ? convert( data.toString() ) : data.toString() );
             data.setLength( 0 );
         }

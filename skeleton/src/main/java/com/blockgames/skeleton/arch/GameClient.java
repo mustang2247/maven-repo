@@ -1,34 +1,40 @@
 package com.blockgames.skeleton.arch;
 
 import com.blockgames.skeleton.base.Finalizer;
-import com.blockgames.skeleton.config.ClientConfig;
 import com.blockgames.skeleton.base.Initializer;
+import com.blockgames.skeleton.config.ClientConfig;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
+@Slf4j
 public class GameClient {
 
-    private static final Logger logger = LoggerFactory.getLogger( GameClient.class );
+    //private static final Logger log = LoggerFactory.getLogger( GameClient.class );
+
     protected String name;
     protected ClientConfig config;
-    protected volatile ClientState clientState = ClientState.BORN;  // 服务状态
+    /**
+     * 服务状态
+     */
+    protected volatile ClientState clientState = ClientState.BORN;
     protected Bootstrap bootstrap = null;
     protected EventLoopGroup eventLoopGroup = null;
     protected ChannelFuture channelFuture = null;
-    protected ChannelInitializer< SocketChannel > channelInitializer = null;
+    protected ChannelInitializer<SocketChannel> channelInitializer = null;
     protected Initializer initializer = null;
     protected Finalizer finalizer = null;
     protected volatile boolean active = false;
 
-    public GameClient( String name ) {
+    public GameClient(String name) {
         this.name = name;
     }
 
@@ -40,29 +46,29 @@ public class GameClient {
         return clientState;
     }
 
-    public void setClientState( ClientState state ) {
+    public void setClientState(ClientState state) {
         this.clientState = state;
     }
 
     public void pauseClient() {
-        setClientState( ClientState.SUSPEND );
+        setClientState(ClientState.SUSPEND);
     }
 
     public void resumeClient() {
-        setClientState( ClientState.RUN );
+        setClientState(ClientState.RUN);
     }
 
-    public GameClient setChannelInitializer( ChannelInitializer< SocketChannel > ci ) {
+    public GameClient setChannelInitializer(ChannelInitializer<SocketChannel> ci) {
         channelInitializer = ci;
         return this;
     }
 
-    public GameClient setInitializer( Initializer init ) {
+    public GameClient setInitializer(Initializer init) {
         initializer = init;
         return this;
     }
 
-    public GameClient setFinalizer( Finalizer f ) {
+    public GameClient setFinalizer(Finalizer f) {
         finalizer = f;
         return this;
     }
@@ -71,25 +77,27 @@ public class GameClient {
         return active;
     }
 
-    public void setActive( boolean b ) {
+    public void setActive(boolean b) {
         active = b;
     }
 
-    public void initClient( ClientConfig cfg ) {
+    public void initClient(ClientConfig cfg) {
 
         this.config = cfg;
 
-        if( initializer != null ) initializer.init();
+        if (initializer != null) {
+            initializer.init();
+        }
 
-        setClientState( ClientState.INIT );
+        setClientState(ClientState.INIT);
     }
 
-    public void initClient( String configFilePath ) {
+    public void initClient(String configFilePath) {
 
         ClientConfig cfg = new ClientConfig();
-        cfg.init( configFilePath );
+        cfg.init(configFilePath);
 
-        initClient( cfg );
+        initClient(cfg);
     }
 
     public Channel getChannel() {
@@ -97,88 +105,89 @@ public class GameClient {
     }
 
     public void startClient() {
-        startClient( 1 );
+        startClient(1);
     }
 
-    public void startClient( int nthreads ) {
-        startClient( nthreads, true );
+    public void startClient(int nthreads) {
+        startClient(nthreads, true);
     }
 
-    public void startClient( int nthreads, boolean installSignal ) {
-        startClient( nthreads, installSignal, true );
+    public void startClient(int nthreads, boolean installSignal) {
+        startClient(nthreads, installSignal, true);
     }
 
-    public void startClient( int nthreads, boolean installSignal, boolean retry ) {
+    public void startClient(int nthreads, boolean installSignal, boolean retry) {
 
-        if( this.channelInitializer == null ) {
-            logger.error( "GameClient-{} channelInitializer is NULL, start fail!", name );
+        if (this.channelInitializer == null) {
+            log.error("GameClient-{} channelInitializer is NULL, start fail!", name);
             throw new RuntimeException();
         }
 
-        if( this.getClientState() != ClientState.INIT && this.getClientState() != ClientState.RUN ) {
-            logger.error( "GameClient-{} is not init, start fail!", name );
+        if (this.getClientState() != ClientState.INIT && this.getClientState() != ClientState.RUN) {
+            log.error("GameClient-{} is not init, start fail!", name);
             throw new RuntimeException();
         }
 
-        if( installSignal ) {
+        if (installSignal) {
             // Runtime.getRuntime().addShutdownHook( new CleanupThread( this ) );
-            Signal.handle( new Signal( "TERM" ), new SafeExitHandler( this ) );
+            Signal.handle(new Signal("TERM"), new SafeExitHandler(this));
         }
 
-        eventLoopGroup = new NioEventLoopGroup( nthreads );
+        eventLoopGroup = new NioEventLoopGroup(nthreads);
         bootstrap = new Bootstrap();
-        bootstrap.group( eventLoopGroup )
-                .channel( NioSocketChannel.class )
-                .option( ChannelOption.TCP_NODELAY, true )
-                .option( ChannelOption.SO_KEEPALIVE, true )
-				.option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
-                .handler( channelInitializer );
+        bootstrap.group(eventLoopGroup)
+                .channel(NioSocketChannel.class)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
+                .handler(channelInitializer);
 
         channelFuture = bootstrap
-                .connect( config.SERVER_ADDR, config.SERVER_PORT )
-                .addListener( new ConnectionListener( this, retry ) );
+                .connect(config.SERVER_ADDR, config.SERVER_PORT)
+                .addListener(new ConnectionListener(this, retry));
 
-        setClientState( ClientState.RUN );
-        logger.info( "GameClient-{} start, connect to {}:{}",
-                name, config.SERVER_ADDR, config.SERVER_PORT );
+        setClientState(ClientState.RUN);
+        log.info("GameClient-{} start, connect to {}:{}",
+                name, config.SERVER_ADDR, config.SERVER_PORT);
     }
 
     public void reconnect() {
-        reconnect( true );
+        reconnect(true);
     }
 
-    public void reconnect( boolean retry ) {
+    public void reconnect(boolean retry) {
         try {
-            if( getClientState() == ClientState.DESTROY ) {
+            if (getClientState() == ClientState.DESTROY) {
                 return;
             }
             channelFuture = bootstrap
-                    .connect( config.SERVER_ADDR, config.SERVER_PORT )
-                    .addListener( new ConnectionListener( this, retry ) );
-        }
-        catch( Exception e ) {
-            logger.error( e.getMessage(), e );
+                    .connect(config.SERVER_ADDR, config.SERVER_PORT)
+                    .addListener(new ConnectionListener(this, retry));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 
     public void stopClient() {
 
-        if( getClientState() == ClientState.DESTROY )
+        if (getClientState() == ClientState.DESTROY) {
             return;
+        }
 
-        setClientState( ClientState.DESTROY );
+        setClientState(ClientState.DESTROY);
 
-        logger.info( "GameClient-{} stopping...", name );
+        log.info("GameClient-{} stopping...", name);
 
         try {
-            logger.info( "GameClient-{} stopping2... finalizer is {}", name, ( finalizer == null ? "null" : "not null" ) );
-            if( finalizer != null ) finalizer.end();
+            log.info("GameClient-{} stopping2... finalizer is {}", name, (finalizer == null ? "null" : "not null"));
+            if (finalizer != null) {
+                finalizer.end();
+            }
             eventLoopGroup.shutdownGracefully().sync();
 
-            logger.info( "GameClient-{} stopped!", name );
-        }
-        catch( Exception e ) {
-            logger.error( e.getMessage(), e );
+            log.info("GameClient-{} stopped!", name);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -189,17 +198,17 @@ public class GameClient {
     // 通过linux信号退出
     private static class SafeExitHandler implements SignalHandler {
 
-        private static final Logger logger = LoggerFactory.getLogger( SafeExitHandler.class );
+        private static final Logger logger = LoggerFactory.getLogger(SafeExitHandler.class);
 
         private GameClient gameClient;
 
-        public SafeExitHandler( GameClient gc ) {
+        public SafeExitHandler(GameClient gc) {
             gameClient = gc;
         }
 
         @Override
-        public void handle( Signal arg0 ) {
-            logger.info( "GameClient-{} receive TERM signal, will stop!", gameClient.getName() );
+        public void handle(Signal arg0) {
+            logger.info("GameClient-{} receive TERM signal, will stop!", gameClient.getName());
             gameClient.stopClient();
         }
     }
@@ -209,18 +218,18 @@ public class GameClient {
     // 但是如果发送kill -9，那就没有机会了
     private static class CleanupThread extends Thread {
 
-        private static final Logger logger = LoggerFactory.getLogger( CleanupThread.class );
+        private static final Logger logger = LoggerFactory.getLogger(CleanupThread.class);
 
         private GameClient gameClient;
 
-        public CleanupThread( GameClient gs ) {
+        public CleanupThread(GameClient gs) {
             gameClient = gs;
         }
 
         @Override
         public void run() {
-            if( gameClient.getClientState() != ClientState.DESTROY ) {
-                logger.info( "GameClient-{} abnormal exit, enter CleanupThread, will stop!", gameClient.getName() );
+            if (gameClient.getClientState() != ClientState.DESTROY) {
+                logger.info("GameClient-{} abnormal exit, enter CleanupThread, will stop!", gameClient.getName());
                 gameClient.stopClient();
             }
         }

@@ -1,32 +1,30 @@
-/**
- * Author: guanxin
- * Date: 2015-08-06
- */
-
 package com.blockgames.skeleton.arch;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+/**
+ * @author mustangkong
+ */
 public class ThreadPoolRegistry {
 
-    private Map< String, ExecutorService > pools = new HashMap<>();
+    private Map<String, ExecutorService> pools = new HashMap<>();
 
     private boolean active = false;
 
     public void shutdown() {
-        if( active ) {
-            pools.forEach( ( k, v ) -> v.shutdown() );
+        if (active) {
+            pools.forEach((k, v) -> v.shutdown());
         }
     }
 
-    public ExecutorService get( String poolName ) {
-        return pools.get( poolName );
+    public ExecutorService get(String poolName) {
+        return pools.get(poolName);
     }
 
-    public ExecutorService set( String poolName, ExecutorService ses ) {
+    public ExecutorService set(String poolName, ExecutorService ses) {
         active = true;
-        return pools.put( poolName, ses );
+        return pools.put(poolName, ses);
     }
 }

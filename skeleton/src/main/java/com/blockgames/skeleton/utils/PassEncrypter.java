@@ -1,15 +1,14 @@
 package com.blockgames.skeleton.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@Slf4j
 public class PassEncrypter {
 
-    private static final Logger logger = LoggerFactory.getLogger( PassEncrypter.class );
-
+    //private static final Logger log = LoggerFactory.getLogger( PassEncrypter.class );
     private static String prefixDefault = "";
     private static String suffixDefault = "";
 
@@ -26,12 +25,13 @@ public class PassEncrypter {
             byte[] buf = md5.digest();
             char[] digit = "0123456789ABCDEF".toCharArray();
             StringBuilder sb = new StringBuilder();
-            for( byte b : buf )
+            for( byte b : buf ) {
                 sb.append( digit[( b & 0xF0 ) >> 4] ).append( digit[b & 0xF] );
+            }
             return sb.toString();
         }
         catch( NoSuchAlgorithmException e ) {
-            logger.error( e.getMessage(), e );
+            log.error( e.getMessage(), e );
         }
         return "";
     }
@@ -39,4 +39,5 @@ public class PassEncrypter {
     public static String encrypt( String val ) {
         return encrypt( prefixDefault, val, suffixDefault );
     }
+
 }

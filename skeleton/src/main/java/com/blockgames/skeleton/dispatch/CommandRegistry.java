@@ -1,13 +1,9 @@
-/**
- *
- */
 package com.blockgames.skeleton.dispatch;
 
 import com.blockgames.skeleton.codec.json.JsonUtil;
 import com.blockgames.skeleton.utils.PackageClassUtil;
 import com.blockgames.skeleton.utils.PropUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.xml.parsers.SAXParserFactory;
 import java.lang.reflect.Method;
@@ -22,11 +18,10 @@ import java.util.Map;
  * @author Cedric(TaoShuang)
  * @create 2012-2-29
  */
+@Slf4j
 public class CommandRegistry {
-
-    private static final Logger logger = LoggerFactory.getLogger( CommandRegistry.class );
-
-    private Map< Integer, CommandProperties > mapping = new HashMap<>();
+    //private static final Logger log = LoggerFactory.getLogger( CommandRegistry.class );
+    private Map<Integer, CommandProperties> mapping = new HashMap<>();
 
     /**
      * 返回该命令的属性。
@@ -35,8 +30,8 @@ public class CommandRegistry {
      * @return
      * @author Cedric(TaoShuang)
      */
-    public CommandProperties get( int messageKindID ) {
-        return mapping.get( messageKindID );
+    public CommandProperties get(int messageKindID) {
+        return mapping.get(messageKindID);
     }
 
     /**
@@ -46,28 +41,27 @@ public class CommandRegistry {
      * @param command
      * @author Cedric(TaoShuang)
      */
-    public CommandProperties put( Integer key, CommandProperties command ) {
-    	if(this.mapping.containsKey(key)) {
-    		throw new RuntimeException("kindId is exist id="+key+" command="+ JsonUtil.toString(command));
-    	}
-        return this.mapping.put( key, command );
+    public CommandProperties put(Integer key, CommandProperties command) {
+        if (this.mapping.containsKey(key)) {
+            throw new RuntimeException("kindId is exist id=" + key + " command=" + JsonUtil.toString(command));
+        }
+        return this.mapping.put(key, command);
     }
 
-    public void initByAnnotation( String packageName, Class< ? extends CommandProperties > class0 ) throws Exception {
-        PackageClassUtil.getClasses( packageName ).forEach(clazz -> {
+    public void initByAnnotation(String packageName, Class<? extends CommandProperties> class0) throws Exception {
+        PackageClassUtil.getClasses(packageName).forEach(clazz -> {
             String className = clazz.getName();
-            if( className != null ) {
-                for( Method method : clazz.getDeclaredMethods() ) {
+            if (className != null) {
+                for (Method method : clazz.getDeclaredMethods()) {
                     MessageHandler handler = method
-                            .getAnnotation( MessageHandler.class );
-                    if( handler != null ) {
+                            .getAnnotation(MessageHandler.class);
+                    if (handler != null) {
                         CommandProperties command = null; // new CommandProperties();
                         try {
                             command = class0.newInstance();
-                        }
-                        catch( Exception e ) {
-                            logger.error( e.getMessage(), e );
-                            throw new RuntimeException( "[CommandRegistry::initByAnnotation]" );
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                            throw new RuntimeException("[CommandRegistry::initByAnnotation]");
                         }
                         command.remoteObjectClassName = method
                                 .getParameterTypes()[1].getName();
@@ -75,81 +69,80 @@ public class CommandRegistry {
                         command.serviceMethodName = method.getName();
                         command.domain = handler.domain();
 
-                        put( handler.kindId(), command );
-                        logger.info( "CommandRegistry::initByAnnotation load {} {} {} {} {}",
+                        put(handler.kindId(), command);
+                        log.info("CommandRegistry::initByAnnotation load {} {} {} {} {}",
                                 handler.kindId(),
                                 command.remoteObjectClassName,
                                 command.serviceClassName,
                                 command.serviceMethodName,
-                                command.domain );
+                                command.domain);
                     }
                 }
             }
-        } );
+        });
 
-        for( CommandProperties prop : mapping.values() ) {
+        for (CommandProperties prop : mapping.values()) {
             prop.init();
         }
     }
 
-    public void initByAnnotation( String packageName ) throws Exception {
-        initByAnnotation( packageName, CommandProperties.class );
+    public void initByAnnotation(String packageName) throws Exception {
+        initByAnnotation(packageName, CommandProperties.class);
     }
 
-    public void initByAnnotationWithoutService( String packageName, Class< ? extends CommandProperties > class0 ) throws Exception {
+    public void initByAnnotationWithoutService(String packageName, Class<? extends CommandProperties> class0) throws Exception {
 
-        PackageClassUtil.getClasses( packageName ).forEach( clazz -> {
+        PackageClassUtil.getClasses(packageName).forEach(clazz -> {
             String className = clazz.getName();
-            if( className != null ) {
-                for( Method method : clazz.getDeclaredMethods() ) {
+            if (className != null) {
+                for (Method method : clazz.getDeclaredMethods()) {
                     MessageHandler handler = method
-                            .getAnnotation( MessageHandler.class );
-                    if( handler != null ) {
+                            .getAnnotation(MessageHandler.class);
+                    if (handler != null) {
                         CommandProperties command = null; // new CommandProperties();
                         try {
                             command = class0.newInstance();
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                            throw new RuntimeException("[CommandRegistry::initByAnnotationWithoutService]");
                         }
-                        catch( Exception e ) {
-                            logger.error( e.getMessage(), e );
-                            throw new RuntimeException( "[CommandRegistry::initByAnnotationWithoutService]" );
-                        }
-                        command.remoteObjectClassName = handler.remoteClass().equals( Object.class ) ?
+                        command.remoteObjectClassName = handler.remoteClass().equals(Object.class) ?
                                 method.getReturnType().getName() :
                                 handler.remoteClass().getName();
                         command.serviceClassName = "null";
                         command.serviceMethodName = "null";
                         command.domain = "null";
 
-                        put( handler.kindId(), command );
-                        logger.info( "CommandRegistry::initByAnnotationWithoutService load {} {} {} {} {}",
+                        put(handler.kindId(), command);
+                        log.info("CommandRegistry::initByAnnotationWithoutService load {} {} {} {} {}",
                                 handler.kindId(),
                                 command.remoteObjectClassName,
                                 command.serviceClassName,
                                 command.serviceMethodName,
-                                command.domain );
+                                command.domain);
                     }
                 }
             }
-        } );
+        });
 
-        for( CommandProperties prop : mapping.values() ) {
+        for (CommandProperties prop : mapping.values()) {
             prop.init();
         }
     }
 
-    public void initByAnnotationWithoutService( String packageName ) throws Exception {
-        initByAnnotationWithoutService( packageName, CommandProperties.class );
+    public void initByAnnotationWithoutService(String packageName) throws Exception {
+        initByAnnotationWithoutService(packageName, CommandProperties.class);
     }
 
-    public void init( String filePath ) throws Exception {
+    public void init(String filePath) throws Exception {
 
         SAXParserFactory
                 .newInstance()
                 .newSAXParser()
-                .parse( PropUtil.getInputStream( filePath ), new CommandLoader(
-                        this ) );
+                .parse(PropUtil.getInputStream(filePath), new CommandLoader(
+                        this));
 
-        for( CommandProperties prop : mapping.values() ) {
+        for (CommandProperties prop : mapping.values()) {
             prop.init();
         }
     }

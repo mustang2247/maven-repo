@@ -3,19 +3,23 @@ package com.blockgames.skeleton.base;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * @author mustangkong
+ */
 public class SynEnvRegistry {
 
-    private ConcurrentMap< Long, SynEnvBase > mappings = new ConcurrentHashMap<>();
+    private ConcurrentMap<Long, SynEnvBase> mappings = new ConcurrentHashMap<>();
 
-    public SynEnvBase get( long synId ) {
-        return mappings.get( synId );
+    public SynEnvBase get(long synId) {
+        return mappings.get(synId);
     }
 
-    public SynEnvBase remove( long synId ) {
-        return mappings.remove( synId );
+    public SynEnvBase remove(long synId) {
+        return mappings.remove(synId);
     }
 
-    public SynEnvBase put( long synId, SynEnvBase seb ) {
-        return mappings.put( synId, seb );
+    public SynEnvBase put(long synId, SynEnvBase seb) {
+        return mappings.put(synId, seb);
     }
+
 }

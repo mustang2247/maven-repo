@@ -6,6 +6,9 @@ import org.apache.log4j.helpers.QuietWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 
+/**
+ * @author mustangkong
+ */
 public class PidDailyRollingFileAppender extends DailyRollingFileAppender {
 
     public PidDailyRollingFileAppender() {
