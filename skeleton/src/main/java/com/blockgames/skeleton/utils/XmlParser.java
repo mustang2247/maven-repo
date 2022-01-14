@@ -4,8 +4,10 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+
 /**
- * Created by hoolai on 2016/9/1.
+ * xml 处理
+ * @author mustangkong
  */
 public class XmlParser extends DefaultHandler {
 

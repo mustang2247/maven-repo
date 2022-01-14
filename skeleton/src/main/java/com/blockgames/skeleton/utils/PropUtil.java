@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
+ * 配置文件读取
  * @author mustangkong
  */
 @Slf4j

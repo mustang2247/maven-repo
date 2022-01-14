@@ -5,10 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * 加密处理
+ * @author mustangkong
+ */
 @Slf4j
 public class PassEncrypter {
 
     //private static final Logger log = LoggerFactory.getLogger( PassEncrypter.class );
+
     private static String prefixDefault = "";
     private static String suffixDefault = "";
 

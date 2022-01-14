@@ -3,6 +3,10 @@ package com.blockgames.skeleton.utils;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * 时间工具
+ * @author mustangkong
+ */
 public class TimeUtil {
 
     public static final TimeZone defaultZone = TimeZone.getDefault();
